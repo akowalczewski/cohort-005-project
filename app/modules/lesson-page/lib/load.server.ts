@@ -89,35 +89,30 @@ export async function loadLessonPage({
   let watchProgress = 0;
   const lessonProgressMap: Record<number, string> = {};
 
-  if (currentUserId) {
-    // Progress is recorded only for people who can take the course, so a
-    // Student under a Country Lock gets none.
-    if (takeAllowed) {
-      // Mark lesson as in-progress when viewed
-      markLessonInProgress(currentUserId, lessonId);
-      const progress = getLessonProgress(currentUserId, lessonId);
-      lessonStatus = progress?.status ?? null;
+  // Progress is recorded only for people who can take the course, so a
+  // Student under a Country Lock gets none.
+  if (currentUserId && takeAllowed) {
+    markLessonInProgress(currentUserId, lessonId);
+    const progress = getLessonProgress(currentUserId, lessonId);
+    lessonStatus = progress?.status ?? null;
 
-      // Get progress for all lessons in course (for curriculum sidebar)
-      const progressRecords = getLessonProgressForCourse(
-        currentUserId,
-        course.id
-      );
-      for (const record of progressRecords) {
-        lessonProgressMap[record.lessonId] = record.status;
-      }
+    const progressRecords = getLessonProgressForCourse(
+      currentUserId,
+      course.id
+    );
+    for (const record of progressRecords) {
+      lessonProgressMap[record.lessonId] = record.status;
+    }
 
-      // Get video watch state for resume and progress display
-      if (lesson.videoUrl) {
-        lastWatchPosition = getLastWatchPosition(currentUserId, lessonId);
-        const videoDurationSeconds = (lesson.durationMinutes ?? 0) * 60;
-        if (videoDurationSeconds > 0) {
-          watchProgress = calculateWatchProgress(
-            currentUserId,
-            lessonId,
-            videoDurationSeconds
-          );
-        }
+    if (lesson.videoUrl) {
+      lastWatchPosition = getLastWatchPosition(currentUserId, lessonId);
+      const videoDurationSeconds = (lesson.durationMinutes ?? 0) * 60;
+      if (videoDurationSeconds > 0) {
+        watchProgress = calculateWatchProgress(
+          currentUserId,
+          lessonId,
+          videoDurationSeconds
+        );
       }
     }
   }
@@ -132,19 +127,16 @@ export async function loadLessonPage({
     : false;
   const note = currentUserId ? getNote(db, currentUserId, lessonId) : undefined;
 
-  // Render lesson content from Markdown to HTML server-side
   const contentHtml = lesson.content
     ? await renderMarkdown(lesson.content)
     : null;
 
-  // Build prev/next navigation
   const allLessons = flattenCourseLessons(courseWithDetails);
   const currentIndex = allLessons.findIndex((l) => l.id === lessonId);
   const prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null;
   const nextLesson =
     currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
 
-  // Check for quiz attached to this lesson
   const quizRecord = getQuizByLessonId(lessonId);
   let quiz: {
     id: number;
