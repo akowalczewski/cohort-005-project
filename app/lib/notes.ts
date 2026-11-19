@@ -6,5 +6,5 @@ export const MAX_NOTE_LENGTH = 2000;
  * so a Note the box said fits is not refused for its line breaks.
  */
 export function normalizeLineBreaks(body: string): string {
-  return body.replace(/\r\n?/g, "\n");
+  return body.replace(/\r\n/g, "\n");
 }
