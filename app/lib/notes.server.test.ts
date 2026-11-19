@@ -88,6 +88,16 @@ describe("saving a Note", () => {
     });
   });
 
+  it("counts a line break as one character, as the Note box does", () => {
+    const body = `${"a".repeat(999)}\r\n${"a".repeat(1000)}`;
+    expect(saveNote(db, base.user.id, lessonIds[0], body, NOW)).toMatchObject({
+      ok: true,
+    });
+    expect(getNote(db, base.user.id, lessonIds[0])?.body).toBe(
+      `${"a".repeat(999)}\n${"a".repeat(1000)}`
+    );
+  });
+
   it("refuses a Note over 2000 characters", () => {
     expect(
       saveNote(db, base.user.id, lessonIds[0], "a".repeat(2001), NOW)
