@@ -15,7 +15,12 @@ export type NoteLimitMeter = {
 // thought, late enough not to nag through an ordinary Note.
 const NEAR_FRACTION = 0.9;
 
-export function measure(body: string, max = MAX_NOTE_LENGTH): NoteLimitMeter {
+/**
+ * How close a Note body is to the Note length limit: what the Note box shows
+ * so the Student sees the limit coming before typing stops.
+ */
+export function noteLimitMeter(body: string): NoteLimitMeter {
+  const max = MAX_NOTE_LENGTH;
   const length = body.length;
   const remaining = Math.max(0, max - length);
   const percentUsed = Math.min(100, Math.round((length / max) * 100));
